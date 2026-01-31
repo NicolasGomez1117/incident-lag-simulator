@@ -1,0 +1,30 @@
+# incident-lag-simulator: G2 canonical incident tape (SINGLE SCENARIO ONLY)
+# Contract: editing this file invalidates the frozen outputs in output/.
+
+scenario:
+  name: iam_propagation_lag_causes_destructive_remediation
+  seed: 1337
+  max_tick: 14
+
+model:
+  tick_unit: "logical_tick"
+
+parameters:
+  propagation_lag_ticks: 6          # control-plane -> data-plane enforcement
+  observer_cache_ttl_ticks: 3       # stale RED persists this long after first error
+  automation_trigger_after_ticks: 4 # consecutive observed RED ticks -> destructive action
+
+actors:
+  regions: ["us-east1", "us-west1"]
+
+incident_events:
+  - tick: 0
+    event: deploy_service_account
+  - tick: 2
+    event: attach_required_role
+    details:
+      role: storage.objectViewer
+  - tick: 3
+    event: service_starts_using_service_account
+  - tick: 7
+    event: operator_assumes_propagation_complete
